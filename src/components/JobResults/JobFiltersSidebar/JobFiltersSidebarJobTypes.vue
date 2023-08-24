@@ -44,6 +44,6 @@ const router = useRouter();
 const selectJobType = () => {
   userStore.ADD_SELECTED_JOB_TYPES(selectedJobTypes.value);
   router.push({ name: "JobResults "});
-}
+};
 
 </script>
