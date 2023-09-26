@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/vue";
 import userEvent from "@testing-library/user-event";
 import { createTestingPinia } from "@pinia/testing";
+import { useRouter } from "vue-router";
+vi.mock("vue-router");
 
 import JobFiltersSidebarOrganizations from "@/components/JobResults/JobFiltersSidebar/JobFiltersSidebarOrganizations.vue";
 import { useJobsStore } from "@/stores/jobs";
@@ -15,9 +17,6 @@ describe("JobFiltersSidebarOrganizations", () => {
 
     render(JobFiltersSidebarOrganizations, {
       global: {
-        mocks: {
-          $router,
-        },
         plugins: [pinia],
         stubs: {
           FontAwesomeIcon: true,
@@ -25,7 +24,7 @@ describe("JobFiltersSidebarOrganizations", () => {
       },
     });
 
-    return { jobsStore, userStore, $router };
+    return { jobsStore, userStore };
   };
 
   it("renders unique list of organizations from jobs", async () => {
@@ -42,6 +41,7 @@ describe("JobFiltersSidebarOrganizations", () => {
 
   describe("when user clicks checkbox", () => {
     it("communicates that user has selected checkbox for organization", async () => {
+      useRouter.mockReturnValue({ push: vi.fn() })
       const { jobsStore, userStore } = renderJobFiltersSidebarOrganizations();
       jobsStore.UNIQUE_ORGANIZATIONS = new Set(["Google", "Amazon"]);
 
@@ -59,7 +59,10 @@ describe("JobFiltersSidebarOrganizations", () => {
     });
 
     it("navigates user to job results page to see fresh batch of filtered jobs", async () => {
-      const { jobsStore, $router } = renderJobFiltersSidebarOrganizations();
+      const push = vi.fn();
+      useRouter.mockReturnValue({ push });
+
+      const { jobsStore } = renderJobFiltersSidebarOrganizations();
       jobsStore.UNIQUE_ORGANIZATIONS = new Set(["Google"]);
 
       const button = screen.getByRole("button", { name: /organizations/i });
@@ -70,7 +73,7 @@ describe("JobFiltersSidebarOrganizations", () => {
       });
       await userEvent.click(googleCheckbox);
 
-      expect($router.push).toHaveBeenCalledWith({ name: "JobResults" });
+      expect(push).toHaveBeenCalledWith({ name: "JobResults" });
     });
   });
 });
