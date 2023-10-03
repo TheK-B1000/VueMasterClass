@@ -10,6 +10,8 @@ import { useJobsStore } from "@/stores/jobs";
 describe("JobListings", () => {
   const renderJobListings = () => {
     const pinia = createTestingPinia();
+    const jobsStore = useJobsStore();
+    jobsStore.FILTERED_JOBS = Array(15).fill({});
 
     render(JobListings, {
       global: {
@@ -19,25 +21,23 @@ describe("JobListings", () => {
         },
       },
     });
+    return { jobsStore };
   };
 
   it("fetches jobs", () => {
     useRoute.mockReturnValue({ query: {} });
 
-    renderJobListings();
+    const { jobsStore } = renderJobListings();
 
-    const jobsStore = useJobsStore();
     expect(jobsStore.FETCH_JOBS).toHaveBeenCalled();
   });
-
 
   it("displays maximum of 10 jobs", async () => {
     useRoute.mockReturnValue({ query: { page: "1" } });
 
+    const { jobsStore } = renderJobListings();
 
-    renderJobListings();
-    const jobsStore = useJobsStore();
-    jobsStore.jobs = Array(15).fill({});
+    jobsStore.FILTERED_JOBS = Array(15).fill({});
 
     const jobListings = await screen.findAllByRole("listitem");
     expect(jobListings).toHaveLength(10);
@@ -67,9 +67,8 @@ describe("JobListings", () => {
     it("does not show link to previous page", async () => {
       useRoute.mockReturnValue({ query: { page: "1" } });
 
-      renderJobListings();
-      const jobsStore = useJobsStore();
-      jobsStore.jobs = Array(15).fill({});
+      const { jobsStore } = renderJobListings();
+      jobsStore.FILTERED_JOBS = Array(15).fill({});
 
       await screen.findAllByRole("listitem");
       const previousLink = screen.queryByRole("link", { name: /previous/i });
@@ -79,9 +78,8 @@ describe("JobListings", () => {
     it("shows link to next page", async () => {
       useRoute.mockReturnValue({ query: { page: "1" } });
 
-      renderJobListings();
-      const jobsStore = useJobsStore();
-      jobsStore.jobs = Array(15).fill({});
+      const { jobsStore } = renderJobListings();
+      jobsStore.FILTERED_JOBS = Array(15).fill({});
 
       await screen.findAllByRole("listitem");
       const nextLink = screen.queryByRole("link", { name: /next/i });
@@ -93,9 +91,8 @@ describe("JobListings", () => {
     it("does not show link to next page", async () => {
       useRoute.mockReturnValue({ query: { page: "2" } });
 
-      renderJobListings();
-      const jobsStore = useJobsStore();
-      jobsStore.jobs = Array(15).fill({});
+      const { jobsStore } = renderJobListings();
+      jobsStore.FILTERED_JOBS = Array(15).fill({});
 
       await screen.findAllByRole("listitem");
       const nextLink = screen.queryByRole("link", { name: /next/i });
@@ -105,9 +102,8 @@ describe("JobListings", () => {
     it("shows link to previous page", async () => {
       useRoute.mockReturnValue({ query: { page: "2" } });
 
-      renderJobListings();
-      const jobsStore = useJobsStore();
-      jobsStore.jobs = Array(15).fill({});
+      const { jobsStore } = renderJobListings();
+      jobsStore.FILTERED_JOBS = Array(15).fill({});
 
       await screen.findAllByRole("listitem");
       const previousLink = screen.queryByRole("link", { name: /previous/i });
